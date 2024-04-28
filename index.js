@@ -41,14 +41,41 @@ async function run() {
     app.get('/productDetails/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
-      const result =await craftCollection.findOne(query);
+      const result = await craftCollection.findOne(query);
       res.send(result);
     });
-    
 
-    app.get('/myCraft:email',async(req,res)=>{
+
+    app.put('/update/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const info = req.body;
+      const data = {
+        $set: {
+
+          name: info.name,
+          img: info.img,
+          price: info.price,
+          rating: info.rating,
+          processing_Time: info.processing_Time,
+          price: info.price,
+          sub_category: info.sub_category,
+          customization: info.customization,
+          stockStatus: info.stockStatus,
+          description: info.description
+
+
+
+        }
+      }
+      const result = await craftCollection.updateOne(query, data, options)
+      res.send(result)
+    })
+
+    app.get('/myCraft:email', async (req, res) => {
       const email = req.params.email
-      const cursor = craftCollection.find({email: email})
+      const cursor = craftCollection.find({ email: email })
       const result = await cursor.toArray();
       res.send(result)
     })
