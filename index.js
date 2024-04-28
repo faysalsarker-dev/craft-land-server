@@ -31,7 +31,7 @@ async function run() {
     const craftCollection = client.db('craft').collection('craftitem');
     // const simple_mflix = client.db('sample_mflix').collection('users');
 
-console.log('data base connected');
+    console.log('data base connected');
     app.get('/allCraft', async (req, res) => {
       const cursor = craftCollection.find();
       const result = await cursor.toArray();
@@ -73,9 +73,25 @@ console.log('data base connected');
       res.send(result)
     })
 
-    app.get('/myCraft:email', async (req, res) => {
+    app.get('/myCraft/:email', async (req, res) => {
       const email = req.params.email
       const cursor = craftCollection.find({ email: email })
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get('/myCraft/:email/:filter', async (req, res) => {
+      const filter = req.params.filter
+      const email = req.params.email
+      const cursor = craftCollection.find({ customization: filter, email: email })
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get('/category/:category', async (req, res) => {
+      const category = req.params.category
+      console.log(category);
+      const cursor = craftCollection.find({ sub_category: category })
       const result = await cursor.toArray();
       res.send(result)
     })
@@ -95,7 +111,7 @@ console.log('data base connected');
       const result = await craftCollection.deleteOne(query);
       res.send(result);
     });
-    
+
 
 
 
