@@ -27,11 +27,11 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+
     const craftCollection = client.db('craft').collection('craftitem');
     // const simple_mflix = client.db('sample_mflix').collection('users');
 
-
+console.log('data base connected');
     app.get('/allCraft', async (req, res) => {
       const cursor = craftCollection.find();
       const result = await cursor.toArray();
@@ -87,6 +87,15 @@ async function run() {
       res.send(result);
     });
 
+
+
+    app.delete('/deleteitam/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftCollection.deleteOne(query);
+      res.send(result);
+    });
+    
 
 
 
