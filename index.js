@@ -29,14 +29,20 @@ async function run() {
   try {
 
     const craftCollection = client.db('craft').collection('craftitem');
-    // const simple_mflix = client.db('sample_mflix').collection('users');
+   
+    
 
     console.log('data base connected');
+
+
     app.get('/allCraft', async (req, res) => {
       const cursor = craftCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
+
+
+
 
     app.get('/productDetails/:id', async (req, res) => {
       const id = req.params.id;
@@ -79,6 +85,7 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
+    
 
     app.get('/myCraft/:email/:filter', async (req, res) => {
       const filter = req.params.filter
@@ -102,6 +109,8 @@ async function run() {
       const result = await craftCollection.insertOne(newCraft);
       res.send(result);
     });
+
+
 
 
 
