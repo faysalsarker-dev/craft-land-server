@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 require('dotenv').config()
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -8,8 +10,17 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Using cors middleware
+app.use(cors(
+  {
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:5174'
+
+    ],
+    credentials: true
+  }
+));
 app.use(express.json());
-app.use(cors());
 
 
 
@@ -25,12 +36,45 @@ const client = new MongoClient(uri, {
   },
 });
 
+const veryfyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  if(!token){
+    return req.status(401).send({Message : 'kj hobe na bro '})
+  }
+  jwt.verify(token,process.env.SECRET_SERVER,(err,decoded)=>{
+    if(err){
+      return res.status(401).send({message:'ae ber o kj hobe na'})
+    }
+    req.user = decoded;
+    next()
+  })
+
+}
+
 async function run() {
   try {
 
     const craftCollection = client.db('craft').collection('craftitem');
-   
-    
+
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const token = jwt.sign(user, process.env.SECRET_SERVER, { expiresIn: '1h' })
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      }).send({ success: true })
+    })
+
+    app.post('/logout',(req,res)=>{
+      const user = req.user;
+      res.clearCookie('token',{
+        maxAge:
+        0
+      }).send({success:true})
+    })
 
     console.log('data base connected');
 
@@ -79,13 +123,13 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/myCraft/:email', async (req, res) => {
+    app.get('/myCraft/:email',veryfyToken, async (req, res) => {
       const email = req.params.email
       const cursor = craftCollection.find({ email: email })
       const result = await cursor.toArray();
       res.send(result)
     })
-    
+
 
     app.get('/myCraft/:email/:filter', async (req, res) => {
       const filter = req.params.filter
